@@ -1,0 +1,149 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Doctors {
+  id                 String             @id @default(uuid())
+  Email              String             @unique
+  FullName           String
+  Password           String?
+  Credentials        String
+  Specialization     String[]
+  CurrentInstitution String
+  YearsOfExperience  Int
+  Education          String
+  Certifications     String[]
+  Awards             String[]
+  Membership         String[]
+  Publications       String[]
+  LanguagesSpoken    String[]
+  Bio                String
+  AreaOfInterest     String[]
+  Links              String
+  LicenseId          String
+  verificationStatus VerificationStatus @default(PENDING)
+  is_Initial         Boolean            @default(true)
+  DoctorDocument     DoctorDocument[]
+  Form               Form[]
+  Articles           Articles[]
+}
+
+enum VerificationStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+model DoctorDocument {
+  id           String   @id @default(uuid())
+  doctorId     String
+  documentUrl  String
+  documentType String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  doctor       Doctors  @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+}
+
+model Admin {
+  id         String  @id @default(uuid())
+  email      String  @unique
+  name       String
+  password   String
+  Role       Role    @default(ADMIN)
+  is_Initial Boolean @default(true)
+}
+
+enum Role {
+  ADMIN
+  SUPER_ADMIN
+}
+
+model Form {
+  id         String          @id
+  doctorId   String
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+  doctor     Doctors         @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  questions  FormQuestions[]
+  FormStatus FormStatus      @default(PENDING)
+}
+
+model FormQuestions {
+  id       String        @id @default(uuid())
+  question String
+  status   QuestionStaus @default(PENDING)
+  formId   String
+  Form     Form          @relation(fields: [formId], references: [id], onDelete: Cascade)
+}
+
+model Articles {
+  id          String          @id @default(uuid())
+  title       String
+  content     String
+  doctorId    String
+  doctor      Doctors         @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  imageUrl    String?
+  category    articleCategory
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  ArticleLike ArticleLike[]
+  ArticleSave ArticleSave[]
+}
+
+enum articleCategory {
+  GENERAL_HEALTH
+  NUTRITION
+  MENTAL_HEALTH
+  DISEASES
+  TREATMENTS
+  MEDICATIONS
+  FITNESS
+  LIFESTYLE
+  CHILD_HEALTH
+  GENERAL
+  OTHER
+}
+
+enum QuestionStaus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum FormStatus {
+  PENDING
+  SUBMITTED
+}
+
+model User {
+  id          String        @id @default(uuid())
+  email       String        @unique
+  FirstName   String
+  LastName    String
+  password    String
+  ArticleLike ArticleLike[]
+  ArticleSave ArticleSave[]
+}
+
+model ArticleLike {
+  id        String   @id @default(uuid())
+  userId    String
+  articleId String
+  user      User     @relation(fields: [userId], references: [id])
+  article   Articles @relation(fields: [articleId], references: [id], onDelete: Cascade)
+}
+
+model ArticleSave {
+  id        String   @id @default(uuid())
+  userId    String
+  articleId String
+  user      User     @relation(fields: [userId], references: [id])
+  article   Articles @relation(fields: [articleId], references: [id], onDelete: Cascade)
+}
