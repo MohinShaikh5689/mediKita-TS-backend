@@ -883,5 +883,5 @@ export const RestPassword = asyncHandle(async (request: FastifyRequest, reply: F
         console.log("Password reset successfully for admin:", email);
         return successHandle({ message: "Password reset successfully" }, reply, 200);
     }
-})
+});
 
